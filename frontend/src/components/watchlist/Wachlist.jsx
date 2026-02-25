@@ -54,6 +54,7 @@ export default function Watchlist() {
   const handleBuySell = (stock, type) => {
     setSelectedStock(stock);
     setTransactionType(type);
+    setPrice(stock.currentPriceInr.toString());
     setShowModal(true);
   };
 
