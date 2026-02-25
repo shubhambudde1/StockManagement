@@ -15,34 +15,40 @@ export default function AuthPage() {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setMessage("");
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setMessage("");
 
-    const url = isSignup ? `${API_BASE}/signup` : `${API_BASE}/signin`;
+  const url = isSignup ? `${API_BASE}/signup` : `${API_BASE}/signin`;
 
-    try {
-      const res = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
-      });
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
 
-      const text = await res.text();
+    const text = await res.text();
 
-      if (text.includes("success")) {
-        // ✅ Save current user in localStorage
-        localStorage.setItem("user", JSON.stringify({ username: form.username }));
+    if (res.ok) {
+      // ✅ Save JWT token
+      localStorage.setItem("token", text);
 
-        // Redirect to homepage/dashboard
-        navigate("/");
-      } else {
-        setMessage(text);
-      }
-    } catch (err) {
-      setMessage("❌ Error connecting to server!");
+      // ✅ Save user info
+      localStorage.setItem(
+        "user",
+        JSON.stringify({ username: form.username })
+      );
+
+      // ✅ Redirect to dashboard
+      navigate("/");   // <-- change route if needed
+    } else {
+      setMessage(text);
     }
-  };
+  } catch (err) {
+    setMessage("❌ Error connecting to server!");
+  }
+};
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">

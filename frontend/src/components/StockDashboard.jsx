@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import General from "./general/General";
-import News from "./news/News";
+import News from "./news/news";
 import IPO from "./ipo/IPO";
 import StockCard from "./search/StockCard";
 import { KeepAlive } from "react-activation";
