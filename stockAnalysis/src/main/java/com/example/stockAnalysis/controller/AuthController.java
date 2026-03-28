@@ -5,6 +5,7 @@ package com.example.stockAnalysis.controller;
 import com.example.stockAnalysis.DTO.AuthRequest;
 import com.example.stockAnalysis.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,7 +24,7 @@ public class AuthController {
     }
 
     @PostMapping("/signin")
-    public String signin(@RequestBody AuthRequest request) {
+    public ResponseEntity<String> signin(@RequestBody AuthRequest request) {
         return authService.signin(request);
     }
 }

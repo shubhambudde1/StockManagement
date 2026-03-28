@@ -19,6 +19,8 @@ export default function Watchlist() {
   const [selectedStock, setSelectedStock] = useState(null);
   const [quantity, setQuantity] = useState("");
   const [price, setPrice] = useState("");
+  const [suggestions, setSuggestions] = useState([]);
+const [showDropdown, setShowDropdown] = useState(false);
 
   // ✅ Fetch watchlists
   const fetchWatchlists = async () => {
@@ -59,50 +61,56 @@ export default function Watchlist() {
   };
 
   // ✅ Search stock by symbol and save automatically
-  const handleSearchStock = async () => {
-    if (!selectedWatchlist) return alert("Select a watchlist first");
-    if (!searchSymbol.trim()) return;
+ const handleSearchStock = async (value) => {
+  setSearchSymbol(value);
 
-    setLoading(true);
-    try {
-      const res = await fetch(`${api_base1}/stock?symbol=${searchSymbol}`);
-      if (!res.ok) throw new Error(`HTTP error! ${res.status}`);
-      const data = await res.json();
+  if (value.trim().length === 0) {
+    setSuggestions([]);
+    setShowDropdown(false);
+    return;
+  }
 
-      // ✅ Map Flask fields → Java fields
-      const stockPayload = {
-        name: data.name || searchSymbol,
-        symbol: data.symbol || searchSymbol,
-        currentPriceInr:
-          data.current_price_inr ||
-          data.price ||
-          data.currentPriceInr ||
-          0,
-        marketCapInr:
-          data.market_cap_inr ||
-          data.market_cap ||
-          data.marketCapInr ||
-          0,
-        peRatio: data.pe_ratio || data.peRatio || 0,
-        industry: data.industry || "N/A",
-        volume: data.volume || 0,
-      };
+  try {
+    const res = await axios.get(
+      `${API_BASE}/watchlists/${selectedWatchlist}/stocks/search?q=${value}`
+    );
 
-      await axios.post(
-        `${API_BASE}/watchlists/${selectedWatchlist}/stocks`,
-        stockPayload
-      );
+    setSuggestions(res.data);
+    setShowDropdown(true);
+  } catch (err) {
+    console.error("Search error", err);
+  }
+};
 
-      setSearchSymbol("");
-      fetchStocks(selectedWatchlist);
-    } catch (err) {
-      console.error("Error fetching stock:", err);
-      alert("Failed to fetch stock. Try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleAddStock = async (symbol) => {
+  if (!selectedWatchlist) return alert("Select a watchlist first");
 
+  try {
+    const res = await fetch(`${api_base1}/stock?symbol=${symbol}`);
+    const data = await res.json();
+
+    const stockPayload = {
+      name: data.name || symbol,
+      symbol: data.symbol || symbol,
+      currentPriceInr: data.current_price_inr || data.price || 0,
+      marketCapInr: data.market_cap_inr || 0,
+      peRatio: data.pe_ratio || 0,
+      industry: data.industry || "N/A",
+      volume: data.volume || 0,
+    };
+
+    await axios.post(
+      `${API_BASE}/watchlists/${selectedWatchlist}/stocks`,
+      stockPayload
+    );
+
+    fetchStocks(selectedWatchlist);
+    setSearchSymbol("");
+    setShowDropdown(false);
+  } catch (err) {
+    console.error("Add stock failed", err);
+  }
+};
   useEffect(() => {
     fetchWatchlists();
   }, []);
@@ -200,22 +208,30 @@ export default function Watchlist() {
           <h2 className="text-xl font-semibold mb-2">Stocks in Watchlist</h2>
 
           {/* ✅ Search by Symbol */}
-          <div className="flex gap-2 mb-3">
-            <input
-              type="text"
-              placeholder="Enter stock symbol (e.g. RELIANCE)"
-              value={searchSymbol}
-              onChange={(e) => setSearchSymbol(e.target.value)}
-              className="border p-2 rounded w-60"
-            />
-            <button
-              onClick={handleSearchStock}
-              className="bg-green-600 text-white px-4 py-2 rounded"
-              disabled={loading}
-            >
-              {loading ? "Adding..." : "Search & Add"}
-            </button>
-          </div>
+          <div className="flex gap-2 mb-3 relative">
+  <input
+    type="text"
+    placeholder="Search stock (RELIANCE, TCS...)"
+    value={searchSymbol}
+    onChange={(e) => handleSearchStock(e.target.value)}
+    className="border p-2 rounded w-60"
+  />
+
+  {showDropdown && suggestions.length > 0 && (
+    <div className="absolute top-12 w-60 bg-white border rounded shadow-lg z-50 max-h-60 overflow-y-auto">
+      {suggestions.map((item, index) => (
+        <div
+          key={index}
+          onClick={() => handleAddStock(item[0])}
+          className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+        >
+          <div className="font-semibold">{item[0]}</div>
+          <div className="text-xs text-gray-500">{item[1]}</div>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
 
           {/* Stock Table */}
           <table className="w-full border text-sm">

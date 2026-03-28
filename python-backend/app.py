@@ -3,6 +3,7 @@ import yfinance as yf
 from datetime import datetime, timedelta
 from flask_cors import CORS
 from STOCK_SEARCH import get_stock_info
+from All_indices_change import get_sector_changes
 
 app = Flask(__name__)
 CORS(app)  # <-- This enables CORS for all routes
@@ -65,6 +66,11 @@ def get_index_changes():
 @app.route("/indexes", methods=["GET"])
 def indexes():
     data = get_index_changes()
+    return jsonify(data)
+
+@app.route("/all_indices", methods=["GET"])
+def all_indices():
+    data = get_sector_changes()
     return jsonify(data)
 
 @app.route("/stock", methods=["GET"])

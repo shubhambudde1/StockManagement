@@ -2,19 +2,42 @@ import React, { useState } from "react";
 import { User2, MoreVertical, LogOut, Settings, HelpCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 function Header() {
   const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const currentUser = JSON.parse(localStorage.getItem("user"));
+  const [suggestions, setSuggestions] = useState([]);
+const [showDropdown, setShowDropdown] = useState(false);
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && query.trim() !== "") {
-      navigate(`/stock/${query.trim().toUpperCase()}`);
-      setQuery("");
-    }
-  };
+const handleKeyDown = (e) => {
+  if (e.key === "Enter") {
+    setShowDropdown(false);
+  }
+};
+  const handleSearch = async (value) => {
+  setQuery(value);
+
+  if (value.length < 1) {
+    setSuggestions([]);
+    setShowDropdown(false);
+    return;
+  }
+
+  try {
+    const res = await fetch(
+`${API_BASE_URL}/api/watchlists/1/stocks/search?q=${encodeURIComponent(value)}`    );
+    const data = await res.json();
+
+    setSuggestions(data);
+    setShowDropdown(true);
+  } catch (err) {
+    console.error(err);
+  }
+};
 
   return (
     <header className="sticky top-0 z-30 border-b border-gray-200 dark:border-gray-800 backdrop-blur bg-white/70 dark:bg-gray-900/70">
@@ -34,13 +57,31 @@ function Header() {
 
         {/* Search */}
         <label className="relative w-full max-w-xl sm:flex-1">
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Search stocks, news, IPOs..."
-            className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white/60 dark:bg-gray-900/60 pl-3 pr-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
-          />
+        <input
+  value={query}
+  onChange={(e) => handleSearch(e.target.value)}
+  onKeyDown={handleKeyDown}
+  placeholder="Search stocks, news, IPOs..."
+  className="w-full rounded-xl border border-gray-300 dark:border-gray-700 bg-white/60 dark:bg-gray-900/60 pl-3 pr-3 py-2 outline-none focus:ring-2 focus:ring-indigo-500"
+/>
+{showDropdown && suggestions.length > 0 && (
+  <div className="absolute top-12 w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-lg z-50 max-h-60 overflow-y-auto">
+    {suggestions.map((item, index) => (
+      <div
+        key={index}
+        onClick={() => {
+          navigate(`/stock/${item[0]}`);
+          setQuery("");
+          setShowDropdown(false);
+        }}
+        className="px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
+      >
+        <div className="font-semibold">{item[0]}</div>
+        <div className="text-xs text-gray-500">{item[1]}</div>
+      </div>
+    ))}
+  </div>
+)}
         </label>
 
         {/* Auth button */}
@@ -102,6 +143,17 @@ function Header() {
                     className="px-4 py-2 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer rounded-b-xl"
                   >
                     <LogOut className="h-4 w-4" /> Wachlist
+                  </li>
+                )}
+                  {currentUser && (
+                  <li
+                    onClick={() => {
+                      navigate("/Actions");
+                      setOpen(false);
+                    }}
+                    className="px-4 py-2 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer rounded-b-xl"
+                  >
+                    <LogOut className="h-4 w-4" /> Actions
                   </li>
                 )}
                 {currentUser && (

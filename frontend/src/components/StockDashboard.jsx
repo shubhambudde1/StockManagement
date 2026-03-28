@@ -97,7 +97,7 @@ export default function StockDashboard() {
             </div>
           </div>
         </div>
-              <NseTopStocks />
+              {/* <NseTopStocks /> */}
         {/* Main Content */}
         <div className="p-4 bg-white rounded-md shadow-sm">{renderContent()}</div>
       </div>

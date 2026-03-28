@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -48,6 +49,7 @@ public class PortfolioController {
     }
 
     // Create new portfolio entry (BUY)
+
     @PostMapping
     public Portfolio createPortfolio(@RequestBody Portfolio portfolio) {
         return portfolioService.addPortfolio(
@@ -82,25 +84,29 @@ public class PortfolioController {
 
     // SELL STOCK (Move to Transaction History and remove from portfolio)
     @PostMapping("/{id}/buy-sell")
-    public String sellStock(@PathVariable Long id) {
+    public String sellStock(@PathVariable Long id,
+                            @RequestBody Map<String, Object> body) {
 
         Portfolio portfolio = portfolioRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Portfolio not found"));
 
-        // Create Transaction History entry
+        Double profitLoss = Double.valueOf(body.get("profitLoss").toString());
+        String type = body.get("transactionType").toString();
+
         TransactionHistory history = new TransactionHistory();
         history.setUser(portfolio.getUser());
         history.setStock(portfolio.getStock());
         history.setQuantity(portfolio.getQuantity());
         history.setAvgPrice(portfolio.getAvgPrice());
-        history.setTransactionType(TransactionType.SELL);
+        history.setTransactionType(TransactionType.valueOf(type)); // ✅ dynamic
+        history.setProfitLoss(profitLoss);
         history.setTimestamp(LocalDateTime.now());
 
         transactionHistoryRepository.save(history);
 
-        // Remove from portfolio
         portfolioRepository.deleteById(id);
 
-        return "Stock Sold Successfully!";
+        return "Transaction Successful!";
     }
 }
+

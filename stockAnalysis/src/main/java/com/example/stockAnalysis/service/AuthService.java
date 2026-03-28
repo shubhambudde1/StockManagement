@@ -5,6 +5,7 @@ import com.example.stockAnalysis.model.User;
 import com.example.stockAnalysis.repositery.UserRepository; // ✅ corrected
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -27,18 +28,18 @@ public class AuthService {
     }
 
     // ✅ Sign-In
-    public String signin(AuthRequest request) {
+    public ResponseEntity<String> signin(AuthRequest request) {
         User user = userRepository.findByUsername(request.getUsername())
                 .orElse(null);
 
         if (user == null) {
-            return "❌ User not found!";
+            return ResponseEntity.status(404).body("❌ User not found!");
         }
 
         if (!user.getPassword().equals(request.getPassword())) {
-            return "❌ Invalid password!";
+            return ResponseEntity.status(401).body("❌ Invalid password!");
         }
 
-        return "✅ Login successful!";
+        return ResponseEntity.ok("✅ Login successful!");
     }
 }

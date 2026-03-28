@@ -4,6 +4,8 @@ import com.example.stockAnalysis.model.Stock;
 import com.example.stockAnalysis.model.Watchlist;
 import com.example.stockAnalysis.repositery.StockRepository;
 import com.example.stockAnalysis.repositery.WatchlistRepository;
+import com.example.stockAnalysis.service.StockService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,4 +53,12 @@ public class StockController {
                 .orElseThrow(() -> new RuntimeException("Stock not found"));
         return ResponseEntity.ok(stock.getSymbol());
     }
+    @Autowired
+    private StockService stockService;
+
+    @GetMapping("/search")
+    public List<Object[]> searchStocks(@RequestParam String q) {
+        return stockService.searchStocks(q);
+    }
 }
+

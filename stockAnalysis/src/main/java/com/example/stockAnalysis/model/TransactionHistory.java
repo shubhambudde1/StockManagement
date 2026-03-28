@@ -30,6 +30,11 @@ public class TransactionHistory {
 
     private LocalDateTime timestamp = LocalDateTime.now();
 
+    private double profitLoss;
+
+    public double getProfitLoss() {
+        return profitLoss;
+    }
     // ===================== GETTERS =====================
 
     public Long getId() { return id; }
@@ -39,6 +44,11 @@ public class TransactionHistory {
     public BigDecimal getAvgPrice() { return avgPrice; }
     public TransactionType getTransactionType() { return transactionType; }
     public LocalDateTime getTimestamp() { return timestamp; }
+
+    public void setProfitLoss(double profitLoss) {
+        this.profitLoss = profitLoss;
+    }
+
 
     // ===================== SETTERS =====================
 

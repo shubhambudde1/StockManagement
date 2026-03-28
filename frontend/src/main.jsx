@@ -8,10 +8,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <StockProvider>
 
-    <AliveScope>
+  
 
     <App />
-    </AliveScope>
+  
     </StockProvider>
   </React.StrictMode>,
 )
