@@ -26,33 +26,40 @@ export default function CurrentPriceTable() {
       const portfolios = res.data;
 
       // Aggregate by symbol
-      const combined = {};
+   const combined = {};
 
-      portfolios.forEach((p) => {
-        const symbol = p.stock?.symbol || p.stock?.id || "N/A";
+portfolios.forEach((p) => {
+  const symbol = p.stock?.symbol || p.stock?.id || "N/A";
 
-        if (!combined[symbol]) {
-          combined[symbol] = {
-            id: p.id,
-            symbol,
-            totalQuantity: p.quantity,
-            totalPrice: p.avgPrice * p.quantity,
-            type: p.transactionType,
-          };
-        } else {
-          combined[symbol].totalQuantity += p.quantity;
-          combined[symbol].totalPrice += p.avgPrice * p.quantity;
-        }
-      });
+  if (!combined[symbol]) {
+    combined[symbol] = {
+      id: p.id,
+      symbol,
+      totalQuantity: p.quantity,
+      totalPrice: p.avgPrice * p.quantity,
+      type: p.transactionType,
+      stopLoss: p.stopLoss,        // ✅ NEW
+      targetPrice: p.targetPrice,  // ✅ NEW
+    };
+  } else {
+    combined[symbol].totalQuantity += p.quantity;
+    combined[symbol].totalPrice += p.avgPrice * p.quantity;
 
-      const portfolioData = Object.values(combined).map((item, index) => ({
-        sirno: index + 1,
-        id: item.id,
-        symbol: item.symbol,
-        quantity: item.totalQuantity,
-        avgPrice: item.totalPrice / item.totalQuantity,
-        type: item.type,
-      }));
+    // optional: keep latest SL/Target
+    combined[symbol].stopLoss = p.stopLoss;
+    combined[symbol].targetPrice = p.targetPrice;
+  }
+});
+  const portfolioData = Object.values(combined).map((item, index) => ({
+  sirno: index + 1,
+  id: item.id,
+  symbol: item.symbol,
+  quantity: item.totalQuantity,
+  avgPrice: item.totalPrice / item.totalQuantity,
+  type: item.type,
+  stopLoss: item.stopLoss,        // ✅ NEW
+  targetPrice: item.targetPrice,  // ✅ NEW
+}));
 
       setPortfolio(portfolioData);
 
@@ -205,6 +212,8 @@ const handleBuySell = async (id, profitLoss, transactionType) => {
               <th className="border p-2">Type</th>
               <th className="border p-2">Invested</th>
               <th className="border p-2">Profit/Loss</th>
+              <th className="border p-2">Stop Loss</th>
+<th className="border p-2">Target</th>
               <th className="border p-2">Action</th>
             </tr>
           </thead>
@@ -218,6 +227,13 @@ const handleBuySell = async (id, profitLoss, transactionType) => {
                 h.type === "BUY"
                   ? (currentPrice - h.avgPrice) * h.quantity
                   : (h.avgPrice - currentPrice) * h.quantity;
+
+
+                    const isStopLossHit =
+    h.stopLoss && currentPrice <= h.stopLoss;
+
+  const isTargetHit =
+    h.targetPrice && currentPrice >= h.targetPrice;
 
               // const toggleLabel = h.type === "BUY" ? "buy" : "sell";
 
@@ -244,6 +260,23 @@ const handleBuySell = async (id, profitLoss, transactionType) => {
                   >
                     {profit.toFixed(2)}
                   </td>
+
+                 <td
+  className={`border p-2 ${
+    isStopLossHit ? "bg-red-200" : ""
+  }`}
+>
+  {h.stopLoss ? h.stopLoss.toFixed(2) : "-"}
+</td>
+
+<td
+  className={`border p-2 ${
+    isTargetHit ? "bg-green-200" : ""
+  }`}
+>
+  {h.targetPrice ? h.targetPrice.toFixed(2) : "-"}
+</td>
+
                   <td className="border p-2">
                     <button
 onClick={() =>

@@ -21,6 +21,8 @@ export default function Watchlist() {
   const [price, setPrice] = useState("");
   const [suggestions, setSuggestions] = useState([]);
 const [showDropdown, setShowDropdown] = useState(false);
+const [stopLoss, setStopLoss] = useState("");
+const [targetPrice, setTargetPrice] = useState("");
 
   // ✅ Fetch watchlists
   const fetchWatchlists = async () => {
@@ -53,12 +55,14 @@ const [showDropdown, setShowDropdown] = useState(false);
   };
 
   // ✅ Handle Buy/Sell action
-  const handleBuySell = (stock, type) => {
-    setSelectedStock(stock);
-    setTransactionType(type);
-    setPrice(stock.currentPriceInr.toString());
-    setShowModal(true);
-  };
+const handleBuySell = (stock, type) => {
+  setSelectedStock(stock);
+  setTransactionType(type);
+  setPrice(stock.currentPriceInr.toString());
+  setStopLoss("");       // reset
+  setTargetPrice("");    // reset
+  setShowModal(true);
+};
 
   // ✅ Search stock by symbol and save automatically
  const handleSearchStock = async (value) => {
@@ -115,30 +119,37 @@ const handleAddStock = async (symbol) => {
     fetchWatchlists();
   }, []);
 
-  const handleTransactionSubmit = async () => {
-    if (!selectedStock || !quantity || !price)
-      return alert("Enter all details");
+const handleTransactionSubmit = async () => {
+  if (!selectedStock || !quantity || !price)
+    return alert("Enter all details");
 
-    try {
-     const payload = {
-      user: { id: 1 }, // TODO: replace with real logged-in user ID
-      stock: { id: selectedStock.id }, // ✅ only send stock ID
-      quantity: parseInt(quantity),
+  try {
+    const payload = {
+      user: { id: 1 },
+      stock: { id: selectedStock.id },
+      quantity: parseFloat(quantity),
       avgPrice: parseFloat(price),
-      transactionType, // "BUY" or "SELL"
+      transactionType,
+      stopLoss: stopLoss ? parseFloat(stopLoss) : null,
+      targetPrice: targetPrice ? parseFloat(targetPrice) : null,
     };
 
-      await axios.post(`${API_BASE}/portfolios`, payload);
+    await axios.post(`${API_BASE}/portfolios`, payload);
 
-      alert(`${transactionType} successful!`);
-      setShowModal(false);
-      setQuantity("");
-      setPrice("");
-    } catch (err) {
-      console.error("Transaction failed", err);
-      alert("Failed to record transaction");
-    }
-  };
+    alert(`${transactionType} successful!`);
+    setShowModal(false);
+
+    // reset
+    setQuantity("");
+    setPrice("");
+    setStopLoss("");
+    setTargetPrice("");
+  } catch (err) {
+    console.error("Transaction failed", err);
+    alert("Failed to record transaction");
+  }
+};
+
   return (
     <div className="p-2 max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-2">📊 Watchlist Manager</h1>
@@ -301,20 +312,38 @@ const handleAddStock = async (symbol) => {
                   {transactionType} - {selectedStock?.name} (
                   {selectedStock?.symbol})
                 </h2>
-                <input
-                  type="number"
-                  placeholder="Quantity"
-                  value={quantity}
-                  onChange={(e) => setQuantity(e.target.value)}
-                  className="border p-2 rounded w-full mb-2"
-                />
-                <input
-                  type="number"
-                  placeholder="Price"
-                  value={price}
-                  onChange={(e) => setPrice(e.target.value)}
-                  className="border p-2 rounded w-full mb-2"
-                />
+              <input
+  type="number"
+  placeholder="Quantity"
+  value={quantity}
+  onChange={(e) => setQuantity(e.target.value)}
+  className="border p-2 rounded w-full mb-2"
+/>
+
+<input
+  type="number"
+  placeholder="Price"
+  value={price}
+  onChange={(e) => setPrice(e.target.value)}
+  className="border p-2 rounded w-full mb-2"
+/>
+
+{/* ✅ NEW */}
+<input
+  type="number"
+  placeholder="Stop Loss (optional)"
+  value={stopLoss}
+  onChange={(e) => setStopLoss(e.target.value)}
+  className="border p-2 rounded w-full mb-2"
+/>
+
+<input
+  type="number"
+  placeholder="Target Price (optional)"
+  value={targetPrice}
+  onChange={(e) => setTargetPrice(e.target.value)}
+  className="border p-2 rounded w-full mb-2"
+/>
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setShowModal(false)}

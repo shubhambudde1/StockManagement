@@ -1,6 +1,5 @@
 package com.example.stockAnalysis.model;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.Getter;
 
@@ -10,12 +9,11 @@ import java.time.LocalDateTime;
 @Getter
 @Entity
 @Table(name = "portfolios")
-
 public class Portfolio {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;   // ❌ Removed @JsonBackReference
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -25,19 +23,25 @@ public class Portfolio {
     @JoinColumn(name = "stock_id", nullable = false)
     private Stock stock;
 
+    @Column(nullable = false)
+    private BigDecimal quantity;
 
     @Column(nullable = false)
-    private BigDecimal quantity;  // Number of shares
-
-    @Column(nullable = false)
-    private BigDecimal avgPrice;  // Average buy price
+    private BigDecimal avgPrice;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private TransactionType transactionType; // BUY or SELL
+    private TransactionType transactionType;
 
     @Column(nullable = false)
-    private LocalDateTime date;  // Date of transaction
+    private LocalDateTime date;
+
+    // ✅ NEW FIELDS
+    @Column(name = "stop_loss")
+    private BigDecimal stopLoss;
+
+    @Column(name = "target_price")
+    private BigDecimal targetPrice;
 
     // Setters
     public void setId(Long id) { this.id = id; }
@@ -47,4 +51,8 @@ public class Portfolio {
     public void setAvgPrice(BigDecimal avgPrice) { this.avgPrice = avgPrice; }
     public void setTransactionType(TransactionType transactionType) { this.transactionType = transactionType; }
     public void setDate(LocalDateTime date) { this.date = date; }
+
+    // ✅ NEW SETTERS
+    public void setStopLoss(BigDecimal stopLoss) { this.stopLoss = stopLoss; }
+    public void setTargetPrice(BigDecimal targetPrice) { this.targetPrice = targetPrice; }
 }

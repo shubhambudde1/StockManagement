@@ -22,7 +22,12 @@ public class PortfolioService {
     @Autowired
     private UserRepository userRepository;
 
-    public Portfolio addPortfolio(Long userId, Long stockId, BigDecimal quantity, BigDecimal avgPrice, TransactionType type) {
+    public Portfolio addPortfolio(Long userId, Long stockId,
+                                  BigDecimal quantity,
+                                  BigDecimal avgPrice,
+                                  TransactionType type,
+                                  BigDecimal stopLoss,
+                                  BigDecimal targetPrice) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -44,6 +49,8 @@ public class PortfolioService {
                     existingPortfolio.setQuantity(newQuantity);
                     existingPortfolio.setAvgPrice(newAvgPrice);
                     existingPortfolio.setDate(LocalDateTime.now());
+                    existingPortfolio.setStopLoss(stopLoss);
+                    existingPortfolio.setTargetPrice(targetPrice);
                     return portfolioRepository.save(existingPortfolio);
                 })
                 .orElseGet(() -> {
@@ -55,9 +62,11 @@ public class PortfolioService {
                     newPortfolio.setAvgPrice(avgPrice);
                     newPortfolio.setTransactionType(type);
                     newPortfolio.setDate(LocalDateTime.now());
+                    newPortfolio.setStopLoss(stopLoss);
+                    newPortfolio.setTargetPrice(targetPrice);
                     return portfolioRepository.save(newPortfolio);
                 });
     }
 
-  
+
 }

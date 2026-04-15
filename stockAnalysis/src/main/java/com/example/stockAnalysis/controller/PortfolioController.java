@@ -49,7 +49,6 @@ public class PortfolioController {
     }
 
     // Create new portfolio entry (BUY)
-
     @PostMapping
     public Portfolio createPortfolio(@RequestBody Portfolio portfolio) {
         return portfolioService.addPortfolio(
@@ -57,10 +56,11 @@ public class PortfolioController {
                 portfolio.getStock().getId(),
                 portfolio.getQuantity(),
                 portfolio.getAvgPrice(),
-                portfolio.getTransactionType()
+                portfolio.getTransactionType(),
+                portfolio.getStopLoss(),      // ✅ NEW
+                portfolio.getTargetPrice()    // ✅ NEW
         );
     }
-
     // Update portfolio
     @PutMapping("/{id}")
     public Portfolio updatePortfolio(@PathVariable Long id,
@@ -72,10 +72,14 @@ public class PortfolioController {
             portfolio.setQuantity(updatedPortfolio.getQuantity());
             portfolio.setAvgPrice(updatedPortfolio.getAvgPrice());
             portfolio.setTransactionType(updatedPortfolio.getTransactionType());
+
+            // ✅ NEW FIELDS
+            portfolio.setStopLoss(updatedPortfolio.getStopLoss());
+            portfolio.setTargetPrice(updatedPortfolio.getTargetPrice());
+
             return portfolioRepository.save(portfolio);
         }).orElseThrow(() -> new RuntimeException("Portfolio not found"));
     }
-
     // Delete portfolio
     @DeleteMapping("/{id}")
     public void deletePortfolio(@PathVariable Long id) {
