@@ -9,6 +9,7 @@ import StockCard from "./components/search/StockCard";
 import Watchlist from "./components/watchlist/Wachlist";
 import Account from "./components/account/Account";
 import Actions from "./components/Actions/Actions";
+import Compare from "./components/compare/Compare";
 
 export default function App() {
   return (
@@ -33,6 +34,8 @@ export default function App() {
 
         {/* Account */}
         <Route path="/account" element={<Account />} />
+        {/* Compare */}
+        <Route path="/compare" element={<Compare />} />
       </Routes>
     </Router>
   );

@@ -22,15 +22,20 @@ public class GrowthServicedata {
             double percent,
             String type
     ) {
+
+
         String sql = """
-    SELECT * 
-    FROM get_growth_dynamic_fn(
-        ?::date, 
-        ?::date, 
-        ?::numeric, 
-        ?::text
-    )
-""";
+                SELECT g.*, cl."sector"
+                FROM (
+                    SELECT * FROM get_growth_dynamic_fn(
+                        ?::date,\s
+                        ?::date,\s
+                        ?::numeric,\s
+                        ?::text
+                    )
+                ) AS g
+                LEFT JOIN companyList cl
+                ON REPLACE(LOWER(g.symbol), '.ns', '') = LOWER(cl.symbol);""";
         return jdbcTemplate.queryForList(
                 sql,
                 startDate,

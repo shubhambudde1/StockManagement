@@ -4,6 +4,8 @@ from datetime import datetime, timedelta
 from flask_cors import CORS
 from STOCK_SEARCH import get_stock_info
 from All_indices_change import get_sector_changes
+from change import get_multiple_changes, normalize_symbol
+
 
 app = Flask(__name__)
 CORS(app)  # <-- This enables CORS for all routes
@@ -88,8 +90,12 @@ def stock():
     data = get_stock_info(symbol)
     return jsonify(data)
 
+
+
 @app.route("/api/current-prices", methods=["POST"])
 def get_current_prices():
+
+
     data = request.json
     symbols = data.get("symbols")
     if not symbols or not isinstance(symbols, list):
@@ -108,6 +114,25 @@ def get_current_prices():
             result[symbol] = None
 
     return jsonify(result)
+
+
+
+
+# Single stock API
+@app.route("/stockC/<symbol>")
+def stock_change(symbol):
+    symbol = normalize_symbol(symbol)
+    data = get_multiple_changes([symbol])
+    return jsonify(data)
+
+
+# Multiple stocks API
+@app.route("/stocksC", methods=["POST"])
+def multiple_stocks():
+    stocks = request.json.get("stocks", [])
+    data = get_multiple_changes(stocks)
+    return jsonify(data)
+
 
 if __name__ == "__main__":
     app.run(debug=True, port=4000)

@@ -167,6 +167,21 @@ const handleKeyDown = (e) => {
                     <LogOut className="h-4 w-4" /> account
                   </li>
                 )}
+
+                 {currentUser && (
+                  <li
+                    onClick={() => {
+                      navigate("/compare");
+                      setOpen(false);
+                    }}
+                    className="px-4 py-2 flex items-center gap-2 hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer rounded-b-xl"
+                  >
+                    <LogOut className="h-4 w-4" /> compare
+                  </li>
+                
+                )}
+
+
                 {!currentUser && (
                   <li
                     onClick={() => {
@@ -178,6 +193,9 @@ const handleKeyDown = (e) => {
                     <LogOut className="h-4 w-4" /> Login<br/> <span>(features)</span>
                   </li>
                 )}
+                
+
+
               </ul>
             </div>
           )}
